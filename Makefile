@@ -11,3 +11,9 @@ run:
 
 deps:
 	go mod tidy
+
+image:
+	docker build -t go-api-tutorial .
+
+docker:
+	docker compose up -d
