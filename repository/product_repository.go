@@ -6,8 +6,7 @@ import (
 	"go-api/model"
 )
 
-
-type ProductRepository struct{
+type ProductRepository struct {
 	connection *sql.DB
 }
 
@@ -17,9 +16,9 @@ func NewProductRepository(connection *sql.DB) ProductRepository {
 	}
 }
 
-func (pr *ProductRepository) GetProducts() ([]model.Product, error){
+func (pr *ProductRepository) GetProducts() ([]model.Product, error) {
 	query := "SELECT id, product_name, price FROM products"
-	rows,err := pr.connection.Query(query)
+	rows, err := pr.connection.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +37,7 @@ func (pr *ProductRepository) GetProducts() ([]model.Product, error){
 	return productsList, nil
 }
 
-func (pr * ProductRepository) CreateProduct(product model.Product) (int,error) {
+func (pr *ProductRepository) CreateProduct(product model.Product) (int, error) {
 	var id int
 	query, err := pr.connection.Prepare(`INSERT INTO products (
 		product_name, price
@@ -50,17 +49,17 @@ func (pr * ProductRepository) CreateProduct(product model.Product) (int,error) {
 	err = query.QueryRow(product.Name, product.Price).Scan(&id)
 	if err != nil {
 		fmt.Println(err)
-		return 0,err
+		return 0, err
 	}
 	query.Close()
-	return id,nil
+	return id, nil
 }
 
-func (pr *ProductRepository) GetProductById(id_product int) (*model.Product, error){
+func (pr *ProductRepository) GetProductById(id_product int) (*model.Product, error) {
 	query, err := pr.connection.Prepare(`SELECT * FROM products WHERE id = $1`)
 	if err != nil {
 		fmt.Println(err)
-		return nil,err
+		return nil, err
 	}
 	var product model.Product
 	err = query.QueryRow(id_product).Scan(
@@ -69,11 +68,11 @@ func (pr *ProductRepository) GetProductById(id_product int) (*model.Product, err
 		&product.Price,
 	)
 	if err != nil {
-		if(err == sql.ErrNoRows){
+		if err == sql.ErrNoRows {
 			return nil, nil
 		}
 		return nil, err
 	}
 	query.Close()
-	return &product,nil
+	return &product, nil
 }

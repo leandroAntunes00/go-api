@@ -9,11 +9,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ProductController struct{
+type ProductController struct {
 	//Usecase
 	productUsecase usecase.Product_usecase
 }
-
 
 func NewProductController(usecase usecase.Product_usecase) *ProductController {
 	return &ProductController{
@@ -31,16 +30,16 @@ func (p *ProductController) GetProducts(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, products)
 }
 
-func (p *ProductController) CreateProduct(ctx *gin.Context){
+func (p *ProductController) CreateProduct(ctx *gin.Context) {
 	var product model.Product
 	err := ctx.BindJSON(&product)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest,err)
+		ctx.JSON(http.StatusBadRequest, err)
 		return
 	}
 	insertedproduct, err := p.productUsecase.CreateProduct(product)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError,err)
+		ctx.JSON(http.StatusInternalServerError, err)
 		return
 	}
 	ctx.JSON(http.StatusCreated, insertedproduct)
@@ -49,7 +48,7 @@ func (p *ProductController) CreateProduct(ctx *gin.Context){
 
 func (p *ProductController) GetProductById(ctx *gin.Context) {
 	id := ctx.Param("productId")
-	if (id == ""){
+	if id == "" {
 		response := model.Response{
 			Message: "id do produto não pode ser nulo",
 		}

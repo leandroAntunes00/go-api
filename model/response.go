@@ -1,5 +1,5 @@
 package model
 
-type Response struct{
+type Response struct {
 	Message string
 }
