@@ -1,3 +1,11 @@
+-- Criação da tabela users
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+
 -- Criação da tabela products simplificada
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,

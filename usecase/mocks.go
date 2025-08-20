@@ -31,3 +31,55 @@ func (m *MockProductRepository) GetProductById(id_product int) (*model.Product, 
 	}
 	return nil, nil
 }
+
+// MockUserRepository é um mock do UserRepository para testes do usecase
+type MockUserRepository struct {
+	CreateUserFunc     func(user model.User) (int, error)
+	GetUserByIDFunc    func(id int) (*model.User, error)
+	GetUserByEmailFunc func(email string) (*model.User, error)
+	UpdateUserFunc     func(user model.User) error
+	DeleteUserFunc     func(id int) error
+	GetUsersFunc       func() ([]model.User, error)
+}
+
+func (m *MockUserRepository) CreateUser(user model.User) (int, error) {
+	if m.CreateUserFunc != nil {
+		return m.CreateUserFunc(user)
+	}
+	return 0, nil
+}
+
+func (m *MockUserRepository) GetUserByID(id int) (*model.User, error) {
+	if m.GetUserByIDFunc != nil {
+		return m.GetUserByIDFunc(id)
+	}
+	return nil, nil
+}
+
+func (m *MockUserRepository) GetUserByEmail(email string) (*model.User, error) {
+	if m.GetUserByEmailFunc != nil {
+		return m.GetUserByEmailFunc(email)
+	}
+	return nil, nil
+}
+
+func (m *MockUserRepository) UpdateUser(user model.User) error {
+	if m.UpdateUserFunc != nil {
+		return m.UpdateUserFunc(user)
+	}
+	return nil
+}
+
+func (m *MockUserRepository) DeleteUser(id int) error {
+	if m.DeleteUserFunc != nil {
+		return m.DeleteUserFunc(id)
+	}
+	return nil
+}
+
+func (m *MockUserRepository) GetUsers() ([]model.User, error) {
+	if m.GetUsersFunc != nil {
+		return m.GetUsersFunc()
+	}
+	return nil, nil
+}

@@ -19,6 +19,32 @@ definitions:
     - name
     - price
     type: object
+  dto.CreateUserRequest:
+    properties:
+      email:
+        description: |-
+          @Description Email of the user
+          @Example "user@example.com"
+        example: user@example.com
+        type: string
+      name:
+        description: |-
+          @Description Name of the user
+          @Example "Leandro"
+        example: Leandro
+        type: string
+      password:
+        description: |-
+          @Description Password of the user
+          @Example "password123"
+        example: password123
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
   dto.ProductResponse:
     properties:
       id:
@@ -40,6 +66,48 @@ definitions:
         example: 999.99
         type: number
     type: object
+  dto.UpdateUserRequest:
+    properties:
+      email:
+        description: |-
+          @Description Email of the user
+          @Example "user@example.com"
+        example: user@example.com
+        type: string
+      name:
+        description: |-
+          @Description Name of the user
+          @Example "Leandro"
+        example: Leandro
+        type: string
+      password:
+        description: |-
+          @Description Password of the user
+          @Example "newpassword123"
+        example: newpassword123
+        type: string
+    type: object
+  dto.UserResponse:
+    properties:
+      email:
+        description: |-
+          @Description Email of the user
+          @Example "user@example.com"
+        example: user@example.com
+        type: string
+      id:
+        description: |-
+          @Description Unique identifier of the user
+          @Example 1
+        example: 1
+        type: integer
+      name:
+        description: |-
+          @Description Name of the user
+          @Example "Leandro"
+        example: Leandro
+        type: string
+    type: object
   model.Response:
     properties:
       message:
@@ -55,7 +123,7 @@ info:
     email: support@swagger.io
     name: API Support
     url: http://www.swagger.io/support
-  description: API REST em Go seguindo Clean Architecture com CRUD de produtos
+  description: API REST em Go seguindo Clean Architecture com CRUD de produtos e usuários
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
@@ -148,7 +216,160 @@ paths:
       summary: Get product by ID
       tags:
       - products
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with the provided information
+      parameters:
+      - description: User information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "400":
+          description: Bad request - Invalid input data
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Create a new user
+      tags:
+      - users
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all users in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of users
+          schema:
+            items:
+              $ref: '#/definitions/dto.UserResponse'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: List all users
+      tags:
+      - users
+  /users/{userId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        minimum: 1
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: User deleted successfully
+        "400":
+          description: Bad request - Invalid ID format
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Delete a user
+      tags:
+      - users
+    get:
+      consumes:
+      - application/json
+      description: Get a specific user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        minimum: 1
+        name: userId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User found
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "400":
+          description: Bad request - Invalid ID format
+          schema:
+            $ref: '#/definitions/model.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Get user by ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update an existing user's information
+      parameters:
+      - description: User ID
+        in: path
+        minimum: 1
+        name: userId
+        required: true
+        type: integer
+      - description: User information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: User updated successfully
+        "400":
+          description: Bad request - Invalid input data
+          schema:
+            $ref: '#/definitions/model.Response'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Update a user
+      tags:
+      - users
 swagger: "2.0"
 tags:
 - description: Operações relacionadas a produtos
   name: products
+- description: Operações relacionadas a usuários
+  name: users
+- description: Endpoints de verificação de saúde da API
+  name: health
