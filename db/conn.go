@@ -7,17 +7,19 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	host     = "go_db"
-	port     = 5432
-	user     = "postgres"
-	password = "postgres"
-	dbname   = "postgres"
-)
+// DatabaseInterface define o contrato para operações de banco
+type DatabaseInterface interface {
+	Ping() error
+	Close() error
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	Prepare(query string) (*sql.Stmt, error)
+}
 
-func ConnectDB() (*sql.DB, error) {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
+// ConnectDB conecta ao banco de dados usando a configuração fornecida
+func ConnectDB(config *Config) (*sql.DB, error) {
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		config.Host, config.Port, config.User, config.Password, config.DBName, config.SSLMode)
 
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
@@ -30,4 +32,10 @@ func ConnectDB() (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+// ConnectDBWithDefaults conecta ao banco usando configurações padrão (mantém compatibilidade)
+func ConnectDBWithDefaults() (*sql.DB, error) {
+	config := NewConfig()
+	return ConnectDB(config)
 }

@@ -30,3 +30,6 @@ Thumbs.db
 
 # Gemini file
 GEMINI.md
+
+# Arquivos de configuração
+.env

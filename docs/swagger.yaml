@@ -1,0 +1,154 @@
+basePath: /
+definitions:
+  dto.CreateProductRequest:
+    properties:
+      name:
+        description: |-
+          @Description Name of the product
+          @Example "iPhone 15"
+        example: iPhone 15
+        type: string
+      price:
+        description: |-
+          @Description Price of the product
+          @Example 999.99
+        example: 999.99
+        minimum: 0
+        type: number
+    required:
+    - name
+    - price
+    type: object
+  dto.ProductResponse:
+    properties:
+      id:
+        description: |-
+          @Description Unique identifier of the product
+          @Example 1
+        example: 1
+        type: integer
+      name:
+        description: |-
+          @Description Name of the product
+          @Example "iPhone 15"
+        example: iPhone 15
+        type: string
+      price:
+        description: |-
+          @Description Price of the product
+          @Example 999.99
+        example: 999.99
+        type: number
+    type: object
+  model.Response:
+    properties:
+      message:
+        description: |-
+          @Description Response message
+          @Example "Operation completed successfully"
+        example: Operation completed successfully
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: API REST em Go seguindo Clean Architecture com CRUD de produtos
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: CRUD GoLang API
+  version: "1.0"
+paths:
+  /product:
+    post:
+      consumes:
+      - application/json
+      description: Create a new product with the provided information
+      parameters:
+      - description: Product information
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Product created successfully
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+        "400":
+          description: Bad request - Invalid input data
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Create a new product
+      tags:
+      - products
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all products in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of products
+          schema:
+            items:
+              $ref: '#/definitions/dto.ProductResponse'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: List all products
+      tags:
+      - products
+  /products/{productId}:
+    get:
+      consumes:
+      - application/json
+      description: Get a specific product by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        minimum: 1
+        name: productId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product found
+          schema:
+            $ref: '#/definitions/dto.ProductResponse'
+        "400":
+          description: Bad request - Invalid ID format
+          schema:
+            $ref: '#/definitions/model.Response'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/model.Response'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.Response'
+      summary: Get product by ID
+      tags:
+      - products
+swagger: "2.0"
+tags:
+- description: Operações relacionadas a produtos
+  name: products

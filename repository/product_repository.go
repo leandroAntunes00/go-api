@@ -6,18 +6,28 @@ import (
 	"go-api/model"
 )
 
+// ProductRepositoryInterface define o contrato para o repository
+type ProductRepositoryInterface interface {
+	GetProducts() ([]model.Product, error)
+	CreateProduct(product model.Product) (int, error)
+	GetProductById(id_product int) (*model.Product, error)
+}
+
 type ProductRepository struct {
 	connection *sql.DB
 }
 
-func NewProductRepository(connection *sql.DB) ProductRepository {
-	return ProductRepository{
+// Ensure ProductRepository implements ProductRepositoryInterface
+var _ ProductRepositoryInterface = (*ProductRepository)(nil)
+
+func NewProductRepository(connection *sql.DB) ProductRepositoryInterface {
+	return &ProductRepository{
 		connection: connection,
 	}
 }
 
 func (pr *ProductRepository) GetProducts() ([]model.Product, error) {
-	query := "SELECT id, product_name, price FROM products"
+	query := "SELECT id, product_name, price FROM products ORDER BY id"
 	rows, err := pr.connection.Query(query)
 	if err != nil {
 		return nil, err
@@ -56,7 +66,7 @@ func (pr *ProductRepository) CreateProduct(product model.Product) (int, error) {
 }
 
 func (pr *ProductRepository) GetProductById(id_product int) (*model.Product, error) {
-	query, err := pr.connection.Prepare(`SELECT * FROM products WHERE id = $1`)
+	query, err := pr.connection.Prepare(`SELECT id, product_name, price FROM products WHERE id = $1`)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err

@@ -5,22 +5,28 @@ import (
 	"go-api/repository"
 )
 
-type Product_usecase struct {
-	//repository
-	repository repository.ProductRepository
+type ProductUsecase interface {
+	GetProducts() ([]model.Product, error)
+	CreateProduct(product model.Product) (model.Product, error)
+	GetProductById(id_product int) (*model.Product, error)
 }
 
-func NewProductUsecase(repo repository.ProductRepository) Product_usecase {
-	return Product_usecase{
+type productUsecaseImpl struct {
+	//repository
+	repository repository.ProductRepositoryInterface
+}
+
+func NewProductUsecase(repo repository.ProductRepositoryInterface) ProductUsecase {
+	return &productUsecaseImpl{
 		repository: repo,
 	}
 }
 
-func (pu *Product_usecase) GetProducts() ([]model.Product, error) {
+func (pu *productUsecaseImpl) GetProducts() ([]model.Product, error) {
 	return pu.repository.GetProducts()
 }
 
-func (pu *Product_usecase) CreateProduct(product model.Product) (model.Product, error) {
+func (pu *productUsecaseImpl) CreateProduct(product model.Product) (model.Product, error) {
 	productId, err := pu.repository.CreateProduct(product)
 	if err != nil {
 		return model.Product{}, err
@@ -29,7 +35,7 @@ func (pu *Product_usecase) CreateProduct(product model.Product) (model.Product, 
 	return product, nil
 }
 
-func (pu *Product_usecase) GetProductById(id_product int) (*model.Product, error) {
+func (pu *productUsecaseImpl) GetProductById(id_product int) (*model.Product, error) {
 	product, err := pu.repository.GetProductById(id_product)
 	if err != nil {
 		return nil, err

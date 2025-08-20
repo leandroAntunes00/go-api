@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"go-api/dto"
 	"go-api/model"
 	"go-api/usecase"
 	"net/http"
@@ -9,43 +10,85 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ProductController handles HTTP requests for products
 type ProductController struct {
 	//Usecase
-	productUsecase usecase.Product_usecase
+	productUsecase usecase.ProductUsecase
 }
 
-func NewProductController(usecase usecase.Product_usecase) *ProductController {
+// NewProductController creates a new ProductController
+func NewProductController(usecase usecase.ProductUsecase) *ProductController {
 	return &ProductController{
 		//Usecase
 		productUsecase: usecase,
 	}
 }
 
+// GetProducts godoc
+// @Summary List all products
+// @Description Get a list of all products in the system
+// @Tags products
+// @Accept json
+// @Produce json
+// @Success 200 {array} dto.ProductResponse "List of products"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /products [get]
 func (p *ProductController) GetProducts(ctx *gin.Context) {
 	products, err := p.productUsecase.GetProducts()
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, products)
+
+	var productResponses []dto.ProductResponse
+	for _, product := range products {
+		productResponses = append(productResponses, toProductResponse(product))
+	}
+
+	ctx.JSON(http.StatusOK, productResponses)
 }
 
+// CreateProduct godoc
+// @Summary Create a new product
+// @Description Create a new product with the provided information
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param product body dto.CreateProductRequest true "Product information"
+// @Success 201 {object} dto.ProductResponse "Product created successfully"
+// @Failure 400 {object} model.Response "Bad request - Invalid input data"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /product [post]
 func (p *ProductController) CreateProduct(ctx *gin.Context) {
-	var product model.Product
-	err := ctx.BindJSON(&product)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, err)
+	var req dto.CreateProductRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	insertedproduct, err := p.productUsecase.CreateProduct(product)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
-		return
-	}
-	ctx.JSON(http.StatusCreated, insertedproduct)
 
+	product := toProductModel(req)
+
+	insertedProduct, err := p.productUsecase.CreateProduct(product)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, toProductResponse(insertedProduct))
 }
 
+// GetProductById godoc
+// @Summary Get product by ID
+// @Description Get a specific product by its ID
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param productId path int true "Product ID" minimum(1)
+// @Success 200 {object} dto.ProductResponse "Product found"
+// @Failure 400 {object} model.Response "Bad request - Invalid ID format"
+// @Failure 404 {object} model.Response "Product not found"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /products/{productId} [get]
 func (p *ProductController) GetProductById(ctx *gin.Context) {
 	id := ctx.Param("productId")
 	if id == "" {
@@ -67,7 +110,7 @@ func (p *ProductController) GetProductById(ctx *gin.Context) {
 
 	product, err := p.productUsecase.GetProductById(productId)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	if product == nil {
@@ -77,5 +120,22 @@ func (p *ProductController) GetProductById(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, response)
 		return
 	}
-	ctx.JSON(http.StatusOK, product)
+	ctx.JSON(http.StatusOK, toProductResponse(*product))
+}
+
+// --- Helper Functions ---
+
+func toProductModel(req dto.CreateProductRequest) model.Product {
+	return model.Product{
+		Name:  req.Name,
+		Price: req.Price,
+	}
+}
+
+func toProductResponse(product model.Product) dto.ProductResponse {
+	return dto.ProductResponse{
+		ID:    product.ID,
+		Name:  product.Name,
+		Price: product.Price,
+	}
 }
