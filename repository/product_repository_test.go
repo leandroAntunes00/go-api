@@ -144,7 +144,7 @@ func TestProductRepository_GetProductById(t *testing.T) {
 		rows := sqlmock.NewRows([]string{"id", "product_name", "price"}).
 			AddRow(expectedProduct.ID, expectedProduct.Name, expectedProduct.Price)
 
-		mock.ExpectPrepare("SELECT \\* FROM products WHERE id = \\$1").
+		mock.ExpectPrepare("SELECT id, product_name, price FROM products WHERE id = \\$1").
 			ExpectQuery().
 			WithArgs(1).
 			WillReturnRows(rows)
@@ -165,7 +165,7 @@ func TestProductRepository_GetProductById(t *testing.T) {
 		assert.NoError(t, err)
 		defer db.Close()
 
-		mock.ExpectPrepare("SELECT \\* FROM products WHERE id = \\$1").
+		mock.ExpectPrepare("SELECT id, product_name, price FROM products WHERE id = \\$1").
 			ExpectQuery().
 			WithArgs(999).
 			WillReturnError(sql.ErrNoRows)
@@ -183,7 +183,7 @@ func TestProductRepository_GetProductById(t *testing.T) {
 		assert.NoError(t, err)
 		defer db.Close()
 
-		mock.ExpectPrepare("SELECT \\* FROM products WHERE id = \\$1").
+		mock.ExpectPrepare("SELECT id, product_name, price FROM products WHERE id = \\$1").
 			ExpectQuery().
 			WithArgs(1).
 			WillReturnError(errors.New("query failed"))
