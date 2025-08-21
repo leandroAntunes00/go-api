@@ -194,3 +194,94 @@ func TestGetUsers(t *testing.T) {
 		assert.Len(t, response, 2)
 	})
 }
+
+func TestLogin(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	t.Run("Success", func(t *testing.T) {
+		mockUsecase := &MockUserUsecase{
+			LoginFunc: func(req dto.LoginRequest) (*dto.LoginResponse, error) {
+				return &dto.LoginResponse{Token: "valid-token"}, nil
+			},
+		}
+
+		loginReq := dto.LoginRequest{
+			Email:    "user@example.com",
+			Password: "password123",
+		}
+		jsonBody, _ := json.Marshal(loginReq)
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		req, _ := http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(jsonBody))
+		req.Header.Set("Content-Type", "application/json")
+		c.Request = req
+
+		userController := NewUserController(mockUsecase)
+		userController.Login(c)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		var response dto.LoginResponse
+		err := json.Unmarshal(w.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, "valid-token", response.Token)
+	})
+
+	t.Run("Invalid Credentials", func(t *testing.T) {
+		mockUsecase := &MockUserUsecase{
+			LoginFunc: func(req dto.LoginRequest) (*dto.LoginResponse, error) {
+				return nil, errors.New("invalid credentials")
+			},
+		}
+
+		loginReq := dto.LoginRequest{
+			Email:    "user@example.com",
+			Password: "wrongpassword",
+		}
+		jsonBody, _ := json.Marshal(loginReq)
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		req, _ := http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(jsonBody))
+		req.Header.Set("Content-Type", "application/json")
+		c.Request = req
+
+		userController := NewUserController(mockUsecase)
+		userController.Login(c)
+
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+		var resp map[string]string
+		err := json.Unmarshal(w.Body.Bytes(), &resp)
+		assert.NoError(t, err)
+		assert.Equal(t, "invalid credentials", resp["error"])
+	})
+
+	t.Run("Internal Error", func(t *testing.T) {
+		mockUsecase := &MockUserUsecase{
+			LoginFunc: func(req dto.LoginRequest) (*dto.LoginResponse, error) {
+				return nil, errors.New("database error")
+			},
+		}
+
+		loginReq := dto.LoginRequest{
+			Email:    "user@example.com",
+			Password: "password123",
+		}
+		jsonBody, _ := json.Marshal(loginReq)
+
+		w := httptest.NewRecorder()
+		c, _ := gin.CreateTestContext(w)
+		req, _ := http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(jsonBody))
+		req.Header.Set("Content-Type", "application/json")
+		c.Request = req
+
+		userController := NewUserController(mockUsecase)
+		userController.Login(c)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		var resp map[string]string
+		err := json.Unmarshal(w.Body.Bytes(), &resp)
+		assert.NoError(t, err)
+		assert.Equal(t, "database error", resp["error"])
+	})
+}

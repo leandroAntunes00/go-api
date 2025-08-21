@@ -194,3 +194,65 @@ func TestUserUsecase_GetUsers(t *testing.T) {
 		assert.Equal(t, expectedUsers[0].Name, userResponses[0].Name)
 	})
 }
+
+func TestUserUsecase_Login(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		password := "password123"
+		hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		mockRepo := &MockUserRepository{
+			GetUserByEmailFunc: func(email string) (*model.User, error) {
+				return &model.User{ID: 1, Email: email, Password: string(hash)}, nil
+			},
+		}
+		usecase := NewUserUsecase(mockRepo)
+		loginReq := dto.LoginRequest{Email: "user@example.com", Password: password}
+		resp, err := usecase.Login(loginReq)
+		assert.NoError(t, err)
+		assert.NotNil(t, resp)
+		assert.NotEmpty(t, resp.Token)
+	})
+
+	t.Run("Invalid Credentials - User Not Found", func(t *testing.T) {
+		mockRepo := &MockUserRepository{
+			GetUserByEmailFunc: func(email string) (*model.User, error) {
+				return nil, nil
+			},
+		}
+		usecase := NewUserUsecase(mockRepo)
+		loginReq := dto.LoginRequest{Email: "notfound@example.com", Password: "password123"}
+		resp, err := usecase.Login(loginReq)
+		assert.Error(t, err)
+		assert.Nil(t, resp)
+		assert.Equal(t, "invalid credentials", err.Error())
+	})
+
+	t.Run("Invalid Credentials - Wrong Password", func(t *testing.T) {
+		password := "password123"
+		hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		mockRepo := &MockUserRepository{
+			GetUserByEmailFunc: func(email string) (*model.User, error) {
+				return &model.User{ID: 1, Email: email, Password: string(hash)}, nil
+			},
+		}
+		usecase := NewUserUsecase(mockRepo)
+		loginReq := dto.LoginRequest{Email: "user@example.com", Password: "wrongpassword"}
+		resp, err := usecase.Login(loginReq)
+		assert.Error(t, err)
+		assert.Nil(t, resp)
+		assert.Equal(t, "invalid credentials", err.Error())
+	})
+
+	t.Run("Internal Error", func(t *testing.T) {
+		mockRepo := &MockUserRepository{
+			GetUserByEmailFunc: func(email string) (*model.User, error) {
+				return nil, errors.New("db error")
+			},
+		}
+		usecase := NewUserUsecase(mockRepo)
+		loginReq := dto.LoginRequest{Email: "user@example.com", Password: "password123"}
+		resp, err := usecase.Login(loginReq)
+		assert.Error(t, err)
+		assert.Nil(t, resp)
+		assert.Equal(t, "db error", err.Error())
+	})
+}

@@ -83,5 +83,8 @@ func main() {
 	server.DELETE("/users/:userId", UserController.DeleteUser)
 	server.GET("/users", UserController.GetUsers)
 
+	// Login route
+	server.POST("/login", UserController.Login)
+
 	server.Run(":8000")
 }

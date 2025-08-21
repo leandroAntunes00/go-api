@@ -163,3 +163,35 @@ func (uc *UserController) GetUsers(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, users)
 }
+
+// Login godoc
+// @Summary User login
+// @Description Authenticate a user and return a JWT token
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param credentials body dto.LoginRequest true "User credentials"
+// @Success 200 {object} dto.LoginResponse "Login successful"
+// @Failure 400 {object} model.Response "Bad request - Invalid input data"
+// @Failure 401 {object} model.Response "Unauthorized - Invalid credentials"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /login [post]
+func (uc *UserController) Login(ctx *gin.Context) {
+	var req dto.LoginRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	response, err := uc.userUsecase.Login(req)
+	if err != nil {
+		if err.Error() == "invalid credentials" {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, response)
+}

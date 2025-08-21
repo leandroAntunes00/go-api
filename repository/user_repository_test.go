@@ -90,26 +90,53 @@ func TestUserRepository_GetUserByEmail(t *testing.T) {
 		assert.NoError(t, err)
 		defer db.Close()
 
-		expectedUser := model.User{
-			ID:       1,
-			Name:     "Leandro",
-			Email:    "leandro@example.com",
-			Password: "password123",
-		}
-
-		rows := sqlmock.NewRows([]string{"id", "name", "email", "password"}).
-			AddRow(expectedUser.ID, expectedUser.Name, expectedUser.Email, expectedUser.Password)
-
+		email := "user@example.com"
+		password := "password123"
 		mock.ExpectQuery(regexp.QuoteMeta("SELECT id, name, email, password FROM users WHERE email = $1")).
-			WithArgs("leandro@example.com").
-			WillReturnRows(rows)
+			WithArgs(email).
+			WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password"}).AddRow(1, "User", email, password))
 
 		repo := NewUserRepository(db)
-		user, err := repo.GetUserByEmail("leandro@example.com")
-
+		user, err := repo.GetUserByEmail(email)
 		assert.NoError(t, err)
 		assert.NotNil(t, user)
-		assert.Equal(t, expectedUser.ID, user.ID)
+		assert.Equal(t, email, user.Email)
+		assert.Equal(t, password, user.Password)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("User Not Found", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+
+		email := "notfound@example.com"
+		mock.ExpectQuery(regexp.QuoteMeta("SELECT id, name, email, password FROM users WHERE email = $1")).
+			WithArgs(email).
+			WillReturnRows(sqlmock.NewRows([]string{"id", "name", "email", "password"}))
+
+		repo := NewUserRepository(db)
+		user, err := repo.GetUserByEmail(email)
+		assert.NoError(t, err)
+		assert.Nil(t, user)
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
+
+	t.Run("Internal Error", func(t *testing.T) {
+		db, mock, err := sqlmock.New()
+		assert.NoError(t, err)
+		defer db.Close()
+
+		email := "user@example.com"
+		mock.ExpectQuery(regexp.QuoteMeta("SELECT id, name, email, password FROM users WHERE email = $1")).
+			WithArgs(email).
+			WillReturnError(errors.New("db error"))
+
+		repo := NewUserRepository(db)
+		user, err := repo.GetUserByEmail(email)
+		assert.Error(t, err)
+		assert.Nil(t, user)
+		assert.Equal(t, "db error", err.Error())
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
 }

@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"go-api/dto"
+	"go-api/internal/util"
 	"go-api/model"
 	"go-api/repository"
 
@@ -16,6 +17,7 @@ type UserUsecase interface {
 	UpdateUser(id int, user dto.UpdateUserRequest) error
 	DeleteUser(id int) error
 	GetUsers() ([]dto.UserResponse, error)
+	Login(login dto.LoginRequest) (*dto.LoginResponse, error)
 }
 
 type userUsecaseImpl struct {
@@ -123,4 +125,26 @@ func (uu *userUsecaseImpl) GetUsers() ([]dto.UserResponse, error) {
 	}
 
 	return userResponses, nil
+}
+
+func (uu *userUsecaseImpl) Login(login dto.LoginRequest) (*dto.LoginResponse, error) {
+	user, err := uu.repository.GetUserByEmail(login.Email)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, errors.New("invalid credentials")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
+	if err != nil {
+		return nil, errors.New("invalid credentials")
+	}
+
+	token, err := util.GenerateToken(user.Email, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.LoginResponse{Token: token}, nil
 }

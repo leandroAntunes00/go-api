@@ -40,6 +40,7 @@ type MockUserUsecase struct {
 	UpdateUserFunc  func(id int, user dto.UpdateUserRequest) error
 	DeleteUserFunc  func(id int) error
 	GetUsersFunc    func() ([]dto.UserResponse, error)
+	LoginFunc       func(req dto.LoginRequest) (*dto.LoginResponse, error)
 }
 
 func (m *MockUserUsecase) CreateUser(user dto.CreateUserRequest) (*dto.UserResponse, error) {
@@ -73,6 +74,13 @@ func (m *MockUserUsecase) DeleteUser(id int) error {
 func (m *MockUserUsecase) GetUsers() ([]dto.UserResponse, error) {
 	if m.GetUsersFunc != nil {
 		return m.GetUsersFunc()
+	}
+	return nil, nil
+}
+
+func (m *MockUserUsecase) Login(req dto.LoginRequest) (*dto.LoginResponse, error) {
+	if m.LoginFunc != nil {
+		return m.LoginFunc(req)
 	}
 	return nil, nil
 }

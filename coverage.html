@@ -1,0 +1,1892 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>cmd: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">go-api/cmd/main.go (0.0%)</option>
+				
+				<option value="file1">go-api/controller/mocks.go (66.7%)</option>
+				
+				<option value="file2">go-api/controller/product_controller.go (95.0%)</option>
+				
+				<option value="file3">go-api/controller/user_controller.go (68.8%)</option>
+				
+				<option value="file4">go-api/db/config.go (0.0%)</option>
+				
+				<option value="file5">go-api/db/conn.go (0.0%)</option>
+				
+				<option value="file6">go-api/docs/docs.go (0.0%)</option>
+				
+				<option value="file7">go-api/internal/util/jwt.go (0.0%)</option>
+				
+				<option value="file8">go-api/repository/mocks.go (0.0%)</option>
+				
+				<option value="file9">go-api/repository/product_repository.go (91.9%)</option>
+				
+				<option value="file10">go-api/repository/user_repository.go (91.7%)</option>
+				
+				<option value="file11">go-api/usecase/mocks.go (66.7%)</option>
+				
+				<option value="file12">go-api/usecase/product_usecase.go (100.0%)</option>
+				
+				<option value="file13">go-api/usecase/user_usecase.go (78.2%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "go-api/controller"
+        "go-api/db"
+        _ "go-api/docs" // Importar a documentação Swagger
+        "go-api/repository"
+        "go-api/usecase"
+
+        "github.com/gin-gonic/gin"
+        swaggerFiles "github.com/swaggo/files"
+        ginSwagger "github.com/swaggo/gin-swagger"
+)
+
+// @title CRUD GoLang API
+// @version 1.0
+// @description API REST em Go seguindo Clean Architecture com CRUD de produtos e usuários
+// @termsOfService http://swagger.io/terms/
+
+// @contact.name API Support
+// @contact.url http://www.swagger.io/support
+// @contact.email support@swagger.io
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:8000
+// @BasePath /
+
+// @tag.name products
+// @tag.description Operações relacionadas a produtos
+
+// @tag.name users
+// @tag.description Operações relacionadas a usuários
+
+// @tag.name health
+// @tag.description Endpoints de verificação de saúde da API
+
+func main() <span class="cov0" title="0">{
+        server := gin.Default()
+
+        // Usar a nova configuração
+        dbConfig := db.NewConfig()
+        dbConnection, err := db.ConnectDB(dbConfig)
+        if err != nil </span><span class="cov0" title="0">{
+                panic(err)</span>
+        }
+
+        // Product
+        <span class="cov0" title="0">ProductRepository := repository.NewProductRepository(dbConnection)
+        ProductUsecase := usecase.NewProductUsecase(ProductRepository)
+        ProductController := controller.NewProductController(ProductUsecase)
+
+        // User
+        UserRepository := repository.NewUserRepository(dbConnection)
+        UserUsecase := usecase.NewUserUsecase(UserRepository)
+        UserController := controller.NewUserController(UserUsecase)
+
+        // Swagger documentation endpoint
+        server.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+        // Ping godoc
+        // @Summary Health check
+        // @Description Check if the API is running
+        // @Tags health
+        // @Accept json
+        // @Produce json
+        // @Success 200 {object} map[string]string "API is running"
+        // @Router /ping [get]
+        server.GET("/ping", func(ctx *gin.Context) </span><span class="cov0" title="0">{
+                ctx.JSON(200, gin.H{"message": "Pong"})
+        }</span>)
+
+        // Product routes
+        <span class="cov0" title="0">server.GET("/products", ProductController.GetProducts)
+        server.POST("/product", ProductController.CreateProduct)
+        server.GET("/products/:productId", ProductController.GetProductById)
+
+        // User routes
+        server.POST("/user", UserController.CreateUser)
+        server.GET("/users/:userId", UserController.GetUserByID)
+        server.PUT("/users/:userId", UserController.UpdateUser)
+        server.DELETE("/users/:userId", UserController.DeleteUser)
+        server.GET("/users", UserController.GetUsers)
+
+        // Login route
+        server.POST("/login", UserController.Login)
+
+        server.Run(":8000")</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package controller
+
+import (
+        "go-api/dto"
+        "go-api/model"
+)
+
+// MockProductUsecase é um mock do ProductUsecase para testes do controller
+type MockProductUsecase struct {
+        GetProductsFunc    func() ([]model.Product, error)
+        CreateProductFunc  func(product model.Product) (model.Product, error)
+        GetProductByIdFunc func(id_product int) (*model.Product, error)
+}
+
+func (m *MockProductUsecase) GetProducts() ([]model.Product, error) <span class="cov8" title="1">{
+        if m.GetProductsFunc != nil </span><span class="cov8" title="1">{
+                return m.GetProductsFunc()
+        }</span>
+        <span class="cov0" title="0">return nil, nil</span>
+}
+
+func (m *MockProductUsecase) CreateProduct(product model.Product) (model.Product, error) <span class="cov8" title="1">{
+        if m.CreateProductFunc != nil </span><span class="cov8" title="1">{
+                return m.CreateProductFunc(product)
+        }</span>
+        <span class="cov0" title="0">return model.Product{}, nil</span>
+}
+
+func (m *MockProductUsecase) GetProductById(id_product int) (*model.Product, error) <span class="cov8" title="1">{
+        if m.GetProductByIdFunc != nil </span><span class="cov8" title="1">{
+                return m.GetProductByIdFunc(id_product)
+        }</span>
+        <span class="cov0" title="0">return nil, nil</span>
+}
+
+// MockUserUsecase é um mock do UserUsecase para testes do controller
+type MockUserUsecase struct {
+        CreateUserFunc  func(user dto.CreateUserRequest) (*dto.UserResponse, error)
+        GetUserByIDFunc func(id int) (*dto.UserResponse, error)
+        UpdateUserFunc  func(id int, user dto.UpdateUserRequest) error
+        DeleteUserFunc  func(id int) error
+        GetUsersFunc    func() ([]dto.UserResponse, error)
+        LoginFunc       func(req dto.LoginRequest) (*dto.LoginResponse, error)
+}
+
+func (m *MockUserUsecase) CreateUser(user dto.CreateUserRequest) (*dto.UserResponse, error) <span class="cov8" title="1">{
+        if m.CreateUserFunc != nil </span><span class="cov8" title="1">{
+                return m.CreateUserFunc(user)
+        }</span>
+        <span class="cov0" title="0">return nil, nil</span>
+}
+
+func (m *MockUserUsecase) GetUserByID(id int) (*dto.UserResponse, error) <span class="cov8" title="1">{
+        if m.GetUserByIDFunc != nil </span><span class="cov8" title="1">{
+                return m.GetUserByIDFunc(id)
+        }</span>
+        <span class="cov0" title="0">return nil, nil</span>
+}
+
+func (m *MockUserUsecase) UpdateUser(id int, user dto.UpdateUserRequest) error <span class="cov8" title="1">{
+        if m.UpdateUserFunc != nil </span><span class="cov8" title="1">{
+                return m.UpdateUserFunc(id, user)
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (m *MockUserUsecase) DeleteUser(id int) error <span class="cov8" title="1">{
+        if m.DeleteUserFunc != nil </span><span class="cov8" title="1">{
+                return m.DeleteUserFunc(id)
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (m *MockUserUsecase) GetUsers() ([]dto.UserResponse, error) <span class="cov8" title="1">{
+        if m.GetUsersFunc != nil </span><span class="cov8" title="1">{
+                return m.GetUsersFunc()
+        }</span>
+        <span class="cov0" title="0">return nil, nil</span>
+}
+
+func (m *MockUserUsecase) Login(req dto.LoginRequest) (*dto.LoginResponse, error) <span class="cov8" title="1">{
+        if m.LoginFunc != nil </span><span class="cov8" title="1">{
+                return m.LoginFunc(req)
+        }</span>
+        <span class="cov0" title="0">return nil, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package controller
+
+import (
+        "go-api/dto"
+        "go-api/model"
+        "go-api/usecase"
+        "net/http"
+        "strconv"
+
+        "github.com/gin-gonic/gin"
+)
+
+// ProductController handles HTTP requests for products
+type ProductController struct {
+        //Usecase
+        productUsecase usecase.ProductUsecase
+}
+
+// NewProductController creates a new ProductController
+func NewProductController(usecase usecase.ProductUsecase) *ProductController <span class="cov8" title="1">{
+        return &amp;ProductController{
+                //Usecase
+                productUsecase: usecase,
+        }
+}</span>
+
+// GetProducts godoc
+// @Summary List all products
+// @Description Get a list of all products in the system
+// @Tags products
+// @Accept json
+// @Produce json
+// @Success 200 {array} dto.ProductResponse "List of products"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /products [get]
+func (p *ProductController) GetProducts(ctx *gin.Context) <span class="cov8" title="1">{
+        products, err := p.productUsecase.GetProducts()
+        if err != nil </span><span class="cov8" title="1">{
+                ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">var productResponses []dto.ProductResponse
+        for _, product := range products </span><span class="cov8" title="1">{
+                productResponses = append(productResponses, toProductResponse(product))
+        }</span>
+
+        <span class="cov8" title="1">ctx.JSON(http.StatusOK, productResponses)</span>
+}
+
+// CreateProduct godoc
+// @Summary Create a new product
+// @Description Create a new product with the provided information
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param product body dto.CreateProductRequest true "Product information"
+// @Success 201 {object} dto.ProductResponse "Product created successfully"
+// @Failure 400 {object} model.Response "Bad request - Invalid input data"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /product [post]
+func (p *ProductController) CreateProduct(ctx *gin.Context) <span class="cov8" title="1">{
+        var req dto.CreateProductRequest
+        if err := ctx.ShouldBindJSON(&amp;req); err != nil </span><span class="cov8" title="1">{
+                ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">product := toProductModel(req)
+
+        insertedProduct, err := p.productUsecase.CreateProduct(product)
+        if err != nil </span><span class="cov8" title="1">{
+                ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">ctx.JSON(http.StatusCreated, toProductResponse(insertedProduct))</span>
+}
+
+// GetProductById godoc
+// @Summary Get product by ID
+// @Description Get a specific product by its ID
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param productId path int true "Product ID" minimum(1)
+// @Success 200 {object} dto.ProductResponse "Product found"
+// @Failure 400 {object} model.Response "Bad request - Invalid ID format"
+// @Failure 404 {object} model.Response "Product not found"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /products/{productId} [get]
+func (p *ProductController) GetProductById(ctx *gin.Context) <span class="cov8" title="1">{
+        id := ctx.Param("productId")
+        if id == "" </span><span class="cov8" title="1">{
+                response := model.Response{
+                        Message: "id do produto não pode ser nulo",
+                }
+                ctx.JSON(http.StatusBadRequest, response)
+                return
+        }</span>
+
+        <span class="cov8" title="1">productId, err := strconv.Atoi(id)
+        if err != nil </span><span class="cov8" title="1">{
+                response := model.Response{
+                        Message: "id do produto precisa ser numero",
+                }
+                ctx.JSON(http.StatusBadRequest, response)
+                return
+        }</span>
+
+        <span class="cov8" title="1">product, err := p.productUsecase.GetProductById(productId)
+        if err != nil </span><span class="cov0" title="0">{
+                ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov8" title="1">if product == nil </span><span class="cov8" title="1">{
+                response := model.Response{
+                        Message: "produto não foi encontrado na base de dados",
+                }
+                ctx.JSON(http.StatusNotFound, response)
+                return
+        }</span>
+        <span class="cov8" title="1">ctx.JSON(http.StatusOK, toProductResponse(*product))</span>
+}
+
+// --- Helper Functions ---
+
+func toProductModel(req dto.CreateProductRequest) model.Product <span class="cov8" title="1">{
+        return model.Product{
+                Name:  req.Name,
+                Price: req.Price,
+        }
+}</span>
+
+func toProductResponse(product model.Product) dto.ProductResponse <span class="cov8" title="1">{
+        return dto.ProductResponse{
+                ID:    product.ID,
+                Name:  product.Name,
+                Price: product.Price,
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package controller
+
+import (
+        "go-api/dto"
+        "go-api/usecase"
+        "net/http"
+        "strconv"
+
+        "github.com/gin-gonic/gin"
+)
+
+// UserController handles HTTP requests for users
+type UserController struct {
+        userUsecase usecase.UserUsecase
+}
+
+// NewUserController creates a new UserController
+func NewUserController(usecase usecase.UserUsecase) *UserController <span class="cov8" title="1">{
+        return &amp;UserController{
+                userUsecase: usecase,
+        }
+}</span>
+
+// CreateUser godoc
+// @Summary Create a new user
+// @Description Create a new user with the provided information
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user body dto.CreateUserRequest true "User information"
+// @Success 201 {object} dto.UserResponse "User created successfully"
+// @Failure 400 {object} model.Response "Bad request - Invalid input data"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /user [post]
+func (uc *UserController) CreateUser(ctx *gin.Context) <span class="cov8" title="1">{
+        var req dto.CreateUserRequest
+        if err := ctx.ShouldBindJSON(&amp;req); err != nil </span><span class="cov0" title="0">{
+                ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">userResponse, err := uc.userUsecase.CreateUser(req)
+        if err != nil </span><span class="cov0" title="0">{
+                ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">ctx.JSON(http.StatusCreated, userResponse)</span>
+}
+
+// GetUserByID godoc
+// @Summary Get user by ID
+// @Description Get a specific user by their ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param userId path int true "User ID" minimum(1)
+// @Success 200 {object} dto.UserResponse "User found"
+// @Failure 400 {object} model.Response "Bad request - Invalid ID format"
+// @Failure 404 {object} model.Response "User not found"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /users/{userId} [get]
+func (uc *UserController) GetUserByID(ctx *gin.Context) <span class="cov8" title="1">{
+        id := ctx.Param("userId")
+        userId, err := strconv.Atoi(id)
+        if err != nil </span><span class="cov0" title="0">{
+                ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">userResponse, err := uc.userUsecase.GetUserByID(userId)
+        if err != nil </span><span class="cov0" title="0">{
+                ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+        <span class="cov8" title="1">if userResponse == nil </span><span class="cov8" title="1">{
+                ctx.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">ctx.JSON(http.StatusOK, userResponse)</span>
+}
+
+// UpdateUser godoc
+// @Summary Update a user
+// @Description Update an existing user's information
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param userId path int true "User ID" minimum(1)
+// @Param user body dto.UpdateUserRequest true "User information"
+// @Success 204 "User updated successfully"
+// @Failure 400 {object} model.Response "Bad request - Invalid input data"
+// @Failure 404 {object} model.Response "User not found"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /users/{userId} [put]
+func (uc *UserController) UpdateUser(ctx *gin.Context) <span class="cov8" title="1">{
+        id := ctx.Param("userId")
+        userId, err := strconv.Atoi(id)
+        if err != nil </span><span class="cov0" title="0">{
+                ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">var req dto.UpdateUserRequest
+        if err := ctx.ShouldBindJSON(&amp;req); err != nil </span><span class="cov0" title="0">{
+                ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">err = uc.userUsecase.UpdateUser(userId, req)
+        if err != nil </span><span class="cov0" title="0">{
+                ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">ctx.Status(http.StatusNoContent)</span>
+}
+
+// DeleteUser godoc
+// @Summary Delete a user
+// @Description Delete a user by their ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param userId path int true "User ID" minimum(1)
+// @Success 204 "User deleted successfully"
+// @Failure 400 {object} model.Response "Bad request - Invalid ID format"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /users/{userId} [delete]
+func (uc *UserController) DeleteUser(ctx *gin.Context) <span class="cov8" title="1">{
+        id := ctx.Param("userId")
+        userId, err := strconv.Atoi(id)
+        if err != nil </span><span class="cov0" title="0">{
+                ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+                return
+        }</span>
+
+        <span class="cov8" title="1">err = uc.userUsecase.DeleteUser(userId)
+        if err != nil </span><span class="cov8" title="1">{
+                ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">ctx.Status(http.StatusNoContent)</span>
+}
+
+// GetUsers godoc
+// @Summary List all users
+// @Description Get a list of all users in the system
+// @Tags users
+// @Accept json
+// @Produce json
+// @Success 200 {array} dto.UserResponse "List of users"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /users [get]
+func (uc *UserController) GetUsers(ctx *gin.Context) <span class="cov8" title="1">{
+        users, err := uc.userUsecase.GetUsers()
+        if err != nil </span><span class="cov0" title="0">{
+                ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">ctx.JSON(http.StatusOK, users)</span>
+}
+
+// Login godoc
+// @Summary User login
+// @Description Authenticate a user and return a JWT token
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param credentials body dto.LoginRequest true "User credentials"
+// @Success 200 {object} dto.LoginResponse "Login successful"
+// @Failure 400 {object} model.Response "Bad request - Invalid input data"
+// @Failure 401 {object} model.Response "Unauthorized - Invalid credentials"
+// @Failure 500 {object} model.Response "Internal server error"
+// @Router /login [post]
+func (uc *UserController) Login(ctx *gin.Context) <span class="cov8" title="1">{
+        var req dto.LoginRequest
+        if err := ctx.ShouldBindJSON(&amp;req); err != nil </span><span class="cov0" title="0">{
+                ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+                return
+        }</span>
+
+        <span class="cov8" title="1">response, err := uc.userUsecase.Login(req)
+        if err != nil </span><span class="cov8" title="1">{
+                if err.Error() == "invalid credentials" </span><span class="cov8" title="1">{
+                        ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+                        return
+                }</span>
+                <span class="cov8" title="1">ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+                return</span>
+        }
+
+        <span class="cov8" title="1">ctx.JSON(http.StatusOK, response)</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package db
+
+import (
+        "os"
+)
+
+// Config contém as configurações de conexão com o banco
+type Config struct {
+        Host     string
+        Port     int
+        User     string
+        Password string
+        DBName   string
+        SSLMode  string
+}
+
+// NewConfig cria uma nova configuração com valores padrão ou de variáveis de ambiente
+func NewConfig() *Config <span class="cov0" title="0">{
+        return &amp;Config{
+                Host:     getEnv("DB_HOST", "localhost"), // Mudado para localhost por padrão
+                Port:     5432,
+                User:     getEnv("DB_USER", "postgres"),
+                Password: getEnv("DB_PASSWORD", "postgres"),
+                DBName:   getEnv("DB_NAME", "postgres"),
+                SSLMode:  getEnv("DB_SSLMODE", "disable"),
+        }
+}</span>
+
+// getEnv retorna o valor da variável de ambiente ou o valor padrão
+func getEnv(key, defaultValue string) string <span class="cov0" title="0">{
+        if value := os.Getenv(key); value != "" </span><span class="cov0" title="0">{
+                return value
+        }</span>
+        <span class="cov0" title="0">return defaultValue</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package db
+
+import (
+        "database/sql"
+        "fmt"
+
+        _ "github.com/lib/pq"
+)
+
+// DatabaseInterface define o contrato para operações de banco
+type DatabaseInterface interface {
+        Ping() error
+        Close() error
+        Query(query string, args ...interface{}) (*sql.Rows, error)
+        QueryRow(query string, args ...interface{}) *sql.Row
+        Prepare(query string) (*sql.Stmt, error)
+}
+
+// ConnectDB conecta ao banco de dados usando a configuração fornecida
+func ConnectDB(config *Config) (*sql.DB, error) <span class="cov0" title="0">{
+        psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+                config.Host, config.Port, config.User, config.Password, config.DBName, config.SSLMode)
+
+        db, err := sql.Open("postgres", psqlInfo)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">err = db.Ping()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return db, nil</span>
+}
+
+// ConnectDBWithDefaults conecta ao banco usando configurações padrão (mantém compatibilidade)
+func ConnectDBWithDefaults() (*sql.DB, error) <span class="cov0" title="0">{
+        config := NewConfig()
+        return ConnectDB(config)
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">// Package docs Code generated by swaggo/swag. DO NOT EDIT
+package docs
+
+import "github.com/swaggo/swag"
+
+const docTemplate = `{
+    "schemes": {{ marshal .Schemes }},
+    "swagger": "2.0",
+    "info": {
+        "description": "{{escape .Description}}",
+        "title": "{{.Title}}",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "{{.Version}}"
+    },
+    "host": "{{.Host}}",
+    "basePath": "{{.BasePath}}",
+    "paths": {
+        "/login": {
+            "post": {
+                "description": "Authenticate a user and return a JWT token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "User login",
+                "parameters": [
+                    {
+                        "description": "User credentials",
+                        "name": "credentials",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "schema": {
+                            "$ref": "#/definitions/dto.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - Invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid credentials",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/product": {
+            "post": {
+                "description": "Create a new product with the provided information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Create a new product",
+                "parameters": [
+                    {
+                        "description": "Product information",
+                        "name": "product",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateProductRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Product created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProductResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - Invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/products": {
+            "get": {
+                "description": "Get a list of all products in the system",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "List all products",
+                "responses": {
+                    "200": {
+                        "description": "List of products",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ProductResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/{productId}": {
+            "get": {
+                "description": "Get a specific product by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Get product by ID",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Product ID",
+                        "name": "productId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProductResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - Invalid ID format",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Product not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/user": {
+            "post": {
+                "description": "Create a new user with the provided information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create a new user",
+                "parameters": [
+                    {
+                        "description": "User information",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "User created successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - Invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/users": {
+            "get": {
+                "description": "Get a list of all users in the system",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "List all users",
+                "responses": {
+                    "200": {
+                        "description": "List of users",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserResponse"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{userId}": {
+            "get": {
+                "description": "Get a specific user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get user by ID",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - Invalid ID format",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update an existing user's information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update a user",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User information",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "User updated successfully"
+                    },
+                    "400": {
+                        "description": "Bad request - Invalid input data",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a user by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Delete a user",
+                "parameters": [
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "User deleted successfully"
+                    },
+                    "400": {
+                        "description": "Bad request - Invalid ID format",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.CreateProductRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "price"
+            ],
+            "properties": {
+                "name": {
+                    "description": "@Description Name of the product\n@Example \"iPhone 15\"",
+                    "type": "string",
+                    "example": "iPhone 15"
+                },
+                "price": {
+                    "description": "@Description Price of the product\n@Example 999.99",
+                    "type": "number",
+                    "minimum": 0,
+                    "example": 999.99
+                }
+            }
+        },
+        "dto.CreateUserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "description": "@Description Email of the user\n@Example \"user@example.com\"",
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "name": {
+                    "description": "@Description Name of the user\n@Example \"Leandro\"",
+                    "type": "string",
+                    "example": "Leandro"
+                },
+                "password": {
+                    "description": "@Description Password of the user\n@Example \"password123\"",
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "password123"
+                }
+            }
+        },
+        "dto.LoginRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ProductResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "@Description Unique identifier of the product\n@Example 1",
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "description": "@Description Name of the product\n@Example \"iPhone 15\"",
+                    "type": "string",
+                    "example": "iPhone 15"
+                },
+                "price": {
+                    "description": "@Description Price of the product\n@Example 999.99",
+                    "type": "number",
+                    "example": 999.99
+                }
+            }
+        },
+        "dto.UpdateUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "@Description Email of the user\n@Example \"user@example.com\"",
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "name": {
+                    "description": "@Description Name of the user\n@Example \"Leandro\"",
+                    "type": "string",
+                    "example": "Leandro"
+                },
+                "password": {
+                    "description": "@Description Password of the user\n@Example \"newpassword123\"",
+                    "type": "string",
+                    "example": "newpassword123"
+                }
+            }
+        },
+        "dto.UserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "description": "@Description Email of the user\n@Example \"user@example.com\"",
+                    "type": "string",
+                    "example": "user@example.com"
+                },
+                "id": {
+                    "description": "@Description Unique identifier of the user\n@Example 1",
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "description": "@Description Name of the user\n@Example \"Leandro\"",
+                    "type": "string",
+                    "example": "Leandro"
+                }
+            }
+        },
+        "model.Response": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "description": "@Description Response message\n@Example \"Operation completed successfully\"",
+                    "type": "string",
+                    "example": "Operation completed successfully"
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "description": "Operações relacionadas a produtos",
+            "name": "products"
+        },
+        {
+            "description": "Operações relacionadas a usuários",
+            "name": "users"
+        },
+        {
+            "description": "Endpoints de verificação de saúde da API",
+            "name": "health"
+        }
+    ]
+}`
+
+// SwaggerInfo holds exported Swagger Info so clients can modify it
+var SwaggerInfo = &amp;swag.Spec{
+        Version:          "1.0",
+        Host:             "localhost:8000",
+        BasePath:         "/",
+        Schemes:          []string{},
+        Title:            "CRUD GoLang API",
+        Description:      "API REST em Go seguindo Clean Architecture com CRUD de produtos e usuários",
+        InfoInstanceName: "swagger",
+        SwaggerTemplate:  docTemplate,
+        LeftDelim:        "{{",
+        RightDelim:       "}}",
+}
+
+func init() <span class="cov0" title="0">{
+        swag.Register(SwaggerInfo.InstanceName(), SwaggerInfo)
+}</span>
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package util
+
+import (
+        "time"
+
+        "github.com/golang-jwt/jwt/v5"
+)
+
+const (
+        SecretKey = "secret"
+)
+
+func GenerateToken(email string, userID int) (string, error) <span class="cov0" title="0">{
+        token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+                jwt.MapClaims{
+                        "email": email,
+                        "id":    userID,
+                        "exp":   time.Now().Add(time.Hour * 24).Unix(),
+                })
+
+        return token.SignedString([]byte(SecretKey))
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package repository
+
+import (
+        "go-api/model"
+
+        "github.com/stretchr/testify/mock"
+)
+
+// MockUserRepository is a mock type for the UserRepositoryInterface
+type MockUserRepository struct {
+        mock.Mock
+}
+
+// CreateUser mocks the CreateUser method
+func (m *MockUserRepository) CreateUser(user model.User) (int, error) <span class="cov0" title="0">{
+        args := m.Called(user)
+        return args.Int(0), args.Error(1)
+}</span>
+
+// GetUserByID mocks the GetUserByID method
+func (m *MockUserRepository) GetUserByID(id int) (*model.User, error) <span class="cov0" title="0">{
+        args := m.Called(id)
+        if args.Get(0) == nil </span><span class="cov0" title="0">{
+                return nil, args.Error(1)
+        }</span>
+        <span class="cov0" title="0">return args.Get(0).(*model.User), args.Error(1)</span>
+}
+
+// GetUserByEmail mocks the GetUserByEmail method
+func (m *MockUserRepository) GetUserByEmail(email string) (*model.User, error) <span class="cov0" title="0">{
+        args := m.Called(email)
+        if args.Get(0) == nil </span><span class="cov0" title="0">{
+                return nil, args.Error(1)
+        }</span>
+        <span class="cov0" title="0">return args.Get(0).(*model.User), args.Error(1)</span>
+}
+
+// UpdateUser mocks the UpdateUser method
+func (m *MockUserRepository) UpdateUser(user model.User) error <span class="cov0" title="0">{
+        args := m.Called(user)
+        return args.Error(0)
+}</span>
+
+// DeleteUser mocks the DeleteUser method
+func (m *MockUserRepository) DeleteUser(id int) error <span class="cov0" title="0">{
+        args := m.Called(id)
+        return args.Error(0)
+}</span>
+
+// GetUsers mocks the GetUsers method
+func (m *MockUserRepository) GetUsers() ([]model.User, error) <span class="cov0" title="0">{
+        args := m.Called()
+        if args.Get(0) == nil </span><span class="cov0" title="0">{
+                return nil, args.Error(1)
+        }</span>
+        <span class="cov0" title="0">return args.Get(0).([]model.User), args.Error(1)</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package repository
+
+import (
+        "database/sql"
+        "fmt"
+        "go-api/model"
+)
+
+// ProductRepositoryInterface define o contrato para o repository
+type ProductRepositoryInterface interface {
+        GetProducts() ([]model.Product, error)
+        CreateProduct(product model.Product) (int, error)
+        GetProductById(id_product int) (*model.Product, error)
+}
+
+type ProductRepository struct {
+        connection *sql.DB
+}
+
+// Ensure ProductRepository implements ProductRepositoryInterface
+var _ ProductRepositoryInterface = (*ProductRepository)(nil)
+
+func NewProductRepository(connection *sql.DB) ProductRepositoryInterface <span class="cov8" title="1">{
+        return &amp;ProductRepository{
+                connection: connection,
+        }
+}</span>
+
+func (pr *ProductRepository) GetProducts() ([]model.Product, error) <span class="cov8" title="1">{
+        query := "SELECT id, product_name, price FROM products ORDER BY id"
+        rows, err := pr.connection.Query(query)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">defer rows.Close()
+
+        var productsList []model.Product
+        var productobj model.Product
+
+        for rows.Next() </span><span class="cov8" title="1">{
+                err = rows.Scan(&amp;productobj.ID, &amp;productobj.Name, &amp;productobj.Price)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">productsList = append(productsList, productobj)</span>
+        }
+        <span class="cov8" title="1">return productsList, nil</span>
+}
+
+func (pr *ProductRepository) CreateProduct(product model.Product) (int, error) <span class="cov8" title="1">{
+        var id int
+        query, err := pr.connection.Prepare(`INSERT INTO products (
+                product_name, price
+        ) VALUES ($1, $2) RETURNING id`)
+        if err != nil </span><span class="cov8" title="1">{
+                fmt.Println(err)
+                return 0, err
+        }</span>
+        <span class="cov8" title="1">err = query.QueryRow(product.Name, product.Price).Scan(&amp;id)
+        if err != nil </span><span class="cov8" title="1">{
+                fmt.Println(err)
+                return 0, err
+        }</span>
+        <span class="cov8" title="1">query.Close()
+        return id, nil</span>
+}
+
+func (pr *ProductRepository) GetProductById(id_product int) (*model.Product, error) <span class="cov8" title="1">{
+        query, err := pr.connection.Prepare(`SELECT id, product_name, price FROM products WHERE id = $1`)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println(err)
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">var product model.Product
+        err = query.QueryRow(id_product).Scan(
+                &amp;product.ID,
+                &amp;product.Name,
+                &amp;product.Price,
+        )
+        if err != nil </span><span class="cov8" title="1">{
+                if err == sql.ErrNoRows </span><span class="cov8" title="1">{
+                        return nil, nil
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+        <span class="cov8" title="1">query.Close()
+        return &amp;product, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package repository
+
+import (
+        "database/sql"
+        "go-api/model"
+)
+
+// UserRepositoryInterface defines the contract for the user repository
+type UserRepositoryInterface interface {
+        CreateUser(user model.User) (int, error)
+        GetUserByID(id int) (*model.User, error)
+        GetUserByEmail(email string) (*model.User, error)
+        UpdateUser(user model.User) error
+        DeleteUser(id int) error
+        GetUsers() ([]model.User, error)
+}
+
+type UserRepository struct {
+        connection *sql.DB
+}
+
+// Ensure UserRepository implements UserRepositoryInterface
+var _ UserRepositoryInterface = (*UserRepository)(nil)
+
+func NewUserRepository(connection *sql.DB) UserRepositoryInterface <span class="cov8" title="1">{
+        return &amp;UserRepository{
+                connection: connection,
+        }
+}</span>
+
+func (ur *UserRepository) CreateUser(user model.User) (int, error) <span class="cov8" title="1">{
+        var id int
+        err := ur.connection.QueryRow(`INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id`, user.Name, user.Email, user.Password).Scan(&amp;id)
+        if err != nil </span><span class="cov0" title="0">{
+                return 0, err
+        }</span>
+
+        <span class="cov8" title="1">return id, nil</span>
+}
+
+func (ur *UserRepository) GetUserByID(id int) (*model.User, error) <span class="cov8" title="1">{
+        var user model.User
+        err := ur.connection.QueryRow(`SELECT id, name, email FROM users WHERE id = $1`, id).Scan(&amp;user.ID, &amp;user.Name, &amp;user.Email)
+        if err != nil </span><span class="cov8" title="1">{
+                if err == sql.ErrNoRows </span><span class="cov8" title="1">{
+                        return nil, nil
+                }</span>
+                <span class="cov0" title="0">return nil, err</span>
+        }
+
+        <span class="cov8" title="1">return &amp;user, nil</span>
+}
+
+func (ur *UserRepository) GetUserByEmail(email string) (*model.User, error) <span class="cov8" title="1">{
+        var user model.User
+        err := ur.connection.QueryRow(`SELECT id, name, email, password FROM users WHERE email = $1`, email).Scan(&amp;user.ID, &amp;user.Name, &amp;user.Email, &amp;user.Password)
+        if err != nil </span><span class="cov8" title="1">{
+                if err == sql.ErrNoRows </span><span class="cov8" title="1">{
+                        return nil, nil
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+
+        <span class="cov8" title="1">return &amp;user, nil</span>
+}
+
+func (ur *UserRepository) UpdateUser(user model.User) error <span class="cov8" title="1">{
+        _, err := ur.connection.Exec(`UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4`, user.Name, user.Email, user.Password, user.ID)
+        return err
+}</span>
+
+func (ur *UserRepository) DeleteUser(id int) error <span class="cov8" title="1">{
+        _, err := ur.connection.Exec(`DELETE FROM users WHERE id = $1`, id)
+        return err
+}</span>
+
+func (ur *UserRepository) GetUsers() ([]model.User, error) <span class="cov8" title="1">{
+        rows, err := ur.connection.Query("SELECT id, name, email FROM users ORDER BY id")
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">defer rows.Close()
+
+        var users []model.User
+        for rows.Next() </span><span class="cov8" title="1">{
+                var user model.User
+                err = rows.Scan(&amp;user.ID, &amp;user.Name, &amp;user.Email)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+                <span class="cov8" title="1">users = append(users, user)</span>
+        }
+
+        <span class="cov8" title="1">return users, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package usecase
+
+import (
+        "go-api/model"
+)
+
+// MockProductRepository é um mock do ProductRepository para testes do usecase
+type MockProductRepository struct {
+        GetProductsFunc    func() ([]model.Product, error)
+        CreateProductFunc  func(product model.Product) (int, error)
+        GetProductByIdFunc func(id_product int) (*model.Product, error)
+}
+
+func (m *MockProductRepository) GetProducts() ([]model.Product, error) <span class="cov8" title="1">{
+        if m.GetProductsFunc != nil </span><span class="cov8" title="1">{
+                return m.GetProductsFunc()
+        }</span>
+        <span class="cov0" title="0">return nil, nil</span>
+}
+
+func (m *MockProductRepository) CreateProduct(product model.Product) (int, error) <span class="cov8" title="1">{
+        if m.CreateProductFunc != nil </span><span class="cov8" title="1">{
+                return m.CreateProductFunc(product)
+        }</span>
+        <span class="cov0" title="0">return 0, nil</span>
+}
+
+func (m *MockProductRepository) GetProductById(id_product int) (*model.Product, error) <span class="cov8" title="1">{
+        if m.GetProductByIdFunc != nil </span><span class="cov8" title="1">{
+                return m.GetProductByIdFunc(id_product)
+        }</span>
+        <span class="cov0" title="0">return nil, nil</span>
+}
+
+// MockUserRepository é um mock do UserRepository para testes do usecase
+type MockUserRepository struct {
+        CreateUserFunc     func(user model.User) (int, error)
+        GetUserByIDFunc    func(id int) (*model.User, error)
+        GetUserByEmailFunc func(email string) (*model.User, error)
+        UpdateUserFunc     func(user model.User) error
+        DeleteUserFunc     func(id int) error
+        GetUsersFunc       func() ([]model.User, error)
+}
+
+func (m *MockUserRepository) CreateUser(user model.User) (int, error) <span class="cov8" title="1">{
+        if m.CreateUserFunc != nil </span><span class="cov8" title="1">{
+                return m.CreateUserFunc(user)
+        }</span>
+        <span class="cov0" title="0">return 0, nil</span>
+}
+
+func (m *MockUserRepository) GetUserByID(id int) (*model.User, error) <span class="cov8" title="1">{
+        if m.GetUserByIDFunc != nil </span><span class="cov8" title="1">{
+                return m.GetUserByIDFunc(id)
+        }</span>
+        <span class="cov0" title="0">return nil, nil</span>
+}
+
+func (m *MockUserRepository) GetUserByEmail(email string) (*model.User, error) <span class="cov8" title="1">{
+        if m.GetUserByEmailFunc != nil </span><span class="cov8" title="1">{
+                return m.GetUserByEmailFunc(email)
+        }</span>
+        <span class="cov0" title="0">return nil, nil</span>
+}
+
+func (m *MockUserRepository) UpdateUser(user model.User) error <span class="cov8" title="1">{
+        if m.UpdateUserFunc != nil </span><span class="cov8" title="1">{
+                return m.UpdateUserFunc(user)
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (m *MockUserRepository) DeleteUser(id int) error <span class="cov8" title="1">{
+        if m.DeleteUserFunc != nil </span><span class="cov8" title="1">{
+                return m.DeleteUserFunc(id)
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (m *MockUserRepository) GetUsers() ([]model.User, error) <span class="cov8" title="1">{
+        if m.GetUsersFunc != nil </span><span class="cov8" title="1">{
+                return m.GetUsersFunc()
+        }</span>
+        <span class="cov0" title="0">return nil, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package usecase
+
+import (
+        "go-api/model"
+        "go-api/repository"
+)
+
+type ProductUsecase interface {
+        GetProducts() ([]model.Product, error)
+        CreateProduct(product model.Product) (model.Product, error)
+        GetProductById(id_product int) (*model.Product, error)
+}
+
+type productUsecaseImpl struct {
+        //repository
+        repository repository.ProductRepositoryInterface
+}
+
+func NewProductUsecase(repo repository.ProductRepositoryInterface) ProductUsecase <span class="cov8" title="1">{
+        return &amp;productUsecaseImpl{
+                repository: repo,
+        }
+}</span>
+
+func (pu *productUsecaseImpl) GetProducts() ([]model.Product, error) <span class="cov8" title="1">{
+        return pu.repository.GetProducts()
+}</span>
+
+func (pu *productUsecaseImpl) CreateProduct(product model.Product) (model.Product, error) <span class="cov8" title="1">{
+        productId, err := pu.repository.CreateProduct(product)
+        if err != nil </span><span class="cov8" title="1">{
+                return model.Product{}, err
+        }</span>
+        <span class="cov8" title="1">product.ID = productId
+        return product, nil</span>
+}
+
+func (pu *productUsecaseImpl) GetProductById(id_product int) (*model.Product, error) <span class="cov8" title="1">{
+        product, err := pu.repository.GetProductById(id_product)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return product, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package usecase
+
+import (
+        "errors"
+        "go-api/dto"
+        "go-api/internal/util"
+        "go-api/model"
+        "go-api/repository"
+
+        "golang.org/x/crypto/bcrypt"
+)
+
+// UserUsecase defines the contract for the user usecase
+type UserUsecase interface {
+        CreateUser(user dto.CreateUserRequest) (*dto.UserResponse, error)
+        GetUserByID(id int) (*dto.UserResponse, error)
+        UpdateUser(id int, user dto.UpdateUserRequest) error
+        DeleteUser(id int) error
+        GetUsers() ([]dto.UserResponse, error)
+        Login(login dto.LoginRequest) (*dto.LoginResponse, error)
+}
+
+type userUsecaseImpl struct {
+        repository repository.UserRepositoryInterface
+}
+
+// NewUserUsecase creates a new instance of UserUsecase
+func NewUserUsecase(repo repository.UserRepositoryInterface) UserUsecase <span class="cov8" title="1">{
+        return &amp;userUsecaseImpl{
+                repository: repo,
+        }
+}</span>
+
+func (uu *userUsecaseImpl) CreateUser(user dto.CreateUserRequest) (*dto.UserResponse, error) <span class="cov8" title="1">{
+        existingUser, err := uu.repository.GetUserByEmail(user.Email)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">if existingUser != nil </span><span class="cov8" title="1">{
+                return nil, errors.New("user with this email already exists")
+        }</span>
+
+        <span class="cov8" title="1">hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">newUser := model.User{
+                Name:     user.Name,
+                Email:    user.Email,
+                Password: string(hashedPassword),
+        }
+
+        id, err := uu.repository.CreateUser(newUser)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return &amp;dto.UserResponse{
+                ID:    id,
+                Name:  user.Name,
+                Email: user.Email,
+        }, nil</span>
+}
+
+func (uu *userUsecaseImpl) GetUserByID(id int) (*dto.UserResponse, error) <span class="cov8" title="1">{
+        user, err := uu.repository.GetUserByID(id)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">if user == nil </span><span class="cov8" title="1">{
+                return nil, nil
+        }</span>
+
+        <span class="cov8" title="1">return &amp;dto.UserResponse{
+                ID:    user.ID,
+                Name:  user.Name,
+                Email: user.Email,
+        }, nil</span>
+}
+
+func (uu *userUsecaseImpl) UpdateUser(id int, user dto.UpdateUserRequest) error <span class="cov8" title="1">{
+        existingUser, err := uu.repository.GetUserByID(id)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">if existingUser == nil </span><span class="cov8" title="1">{
+                return errors.New("user not found")
+        }</span>
+
+        <span class="cov8" title="1">if user.Name != "" </span><span class="cov8" title="1">{
+                existingUser.Name = user.Name
+        }</span>
+        <span class="cov8" title="1">if user.Email != "" </span><span class="cov0" title="0">{
+                existingUser.Email = user.Email
+        }</span>
+        <span class="cov8" title="1">if user.Password != "" </span><span class="cov0" title="0">{
+                hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov0" title="0">existingUser.Password = string(hashedPassword)</span>
+        }
+
+        <span class="cov8" title="1">return uu.repository.UpdateUser(*existingUser)</span>
+}
+
+func (uu *userUsecaseImpl) DeleteUser(id int) error <span class="cov8" title="1">{
+        return uu.repository.DeleteUser(id)
+}</span>
+
+func (uu *userUsecaseImpl) GetUsers() ([]dto.UserResponse, error) <span class="cov8" title="1">{
+        users, err := uu.repository.GetUsers()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var userResponses []dto.UserResponse
+        for _, user := range users </span><span class="cov8" title="1">{
+                userResponses = append(userResponses, dto.UserResponse{
+                        ID:    user.ID,
+                        Name:  user.Name,
+                        Email: user.Email,
+                })
+        }</span>
+
+        <span class="cov8" title="1">return userResponses, nil</span>
+}
+
+func (uu *userUsecaseImpl) Login(login dto.LoginRequest) (*dto.LoginResponse, error) <span class="cov8" title="1">{
+        user, err := uu.repository.GetUserByEmail(login.Email)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">if user == nil </span><span class="cov8" title="1">{
+                return nil, errors.New("invalid credentials")
+        }</span>
+
+        <span class="cov8" title="1">err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(login.Password))
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, errors.New("invalid credentials")
+        }</span>
+
+        <span class="cov8" title="1">token, err := util.GenerateToken(user.Email, user.ID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return &amp;dto.LoginResponse{Token: token}, nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
